@@ -9,6 +9,7 @@ import audio2 from './assets/O turn.mp3'
 import audio3 from './assets/X win.mp3'
 import audio4 from './assets/O win.mp3'
 import audio5 from './assets/Draw.mp3'
+import audio6 from './assets/Score Reseted.mp3'
 
 function playAudio(i) {
   document.querySelector(`.audio-${i}`).play()
@@ -23,6 +24,7 @@ function Audio() {
       <audio className='audio-3' src={audio3}></audio>
       <audio className='audio-4' src={audio4}></audio>
       <audio className='audio-5' src={audio5}></audio>
+      <audio className='audio-6' src={audio6}></audio>
     </>
   )
 }
@@ -31,10 +33,11 @@ function Score({xScore, oScore, setXScore, setOScore}) {
   function reset() {
     setXScore(0)
     setOScore(0)
+    playAudio(6)
   }
 
   return (
-    <div className="score d-none">
+    <div className="score">
       <table>
         <thead>
           <tr>
@@ -63,10 +66,7 @@ Score.propTypes = {
 
 function PlayButton({startGame}) {
   function displayGame() {
-    document.querySelector('.game').classList.remove('d-none')
-    document.querySelector('.score').classList.remove('d-none')
-    document.querySelector('.history').classList.remove('d-none')
-    document.querySelector('.status').classList.remove('d-none')
+    document.querySelector('.game-display').classList.remove('d-none')
     document.querySelector('.play-container').classList.add('d-none')
     
     startGame()
@@ -103,7 +103,7 @@ Track.propTypes = {
 
 function History({history, viewHistory}) {
   return (
-    <div className="history d-none">
+    <div className="history">
       {history.map((h, i) => {
         return <Track key={i} data={h} index={i} viewHistory={viewHistory} />
       })}
@@ -129,12 +129,16 @@ function App() {
     document.querySelector('.play-again').classList.add('d-none')
     setSquare(Array(9).fill(null))
 
-    if (turn == null) {
-      setTurn(Date.now() % 2 == 0 ? 'X' : 'O')
-    }
-
     setHistory([Array(9).fill(null)])
-    turn == 'X' ? playAudio(1) : playAudio(2)
+    if (turn == 'X') {
+      playAudio(1)
+    } else if (turn == 'O') {
+      playAudio(2)
+    } else {
+      const rand = Date.now() % 2
+      rand == 0 ? setTurn('X') : setTurn('O')
+      playAudio(rand + 1)
+    }
     setStatus('Turn')
   }
 
@@ -193,7 +197,7 @@ function App() {
       data.slice(6, 9).every(d => d == 'X') ||
       [data[0], data[3], data[6]].every(d => d == 'X') ||
       [data[1], data[4], data[7]].every(d => d == 'X') ||
-      [data[3], data[5], data[8]].every(d => d == 'X') ||
+      [data[2], data[5], data[8]].every(d => d == 'X') ||
       [data[0], data[4], data[8]].every(d => d == 'X') ||
       [data[2 ], data[4], data[6]].every(d => d == 'X')
     ) {
@@ -204,7 +208,7 @@ function App() {
       data.slice(6, 9).every(d => d == 'O') ||
       [data[0], data[3], data[6]].every(d => d == 'O') ||
       [data[1], data[4], data[7]].every(d => d == 'O') ||
-      [data[3], data[5], data[8]].every(d => d == 'O') ||
+      [data[2], data[5], data[8]].every(d => d == 'O') ||
       [data[0], data[4], data[8]].every(d => d == 'O') ||
       [data[2], data[4], data[6]].every(d => d == 'O')
     ) {
@@ -221,16 +225,18 @@ function App() {
       <Audio />
       <h1 className='title'>Tic Tac Toe</h1>
       <PlayButton startGame={startGame} />
-      <Score xScore={xScore} oScore={oScore} setXScore={setXScore} setOScore={setOScore} />
-      <div className="game d-none">
-        <Board turn={turn} handlePlay={handlePlay} status={status} square={square} setSquare={setSquare} checkWinner={checkWinner} />
+      <div className='game-display d-none'>
+        <Score xScore={xScore} oScore={oScore} setXScore={setXScore} setOScore={setOScore} />
+        <div className="game">
+          <Board turn={turn} handlePlay={handlePlay} status={status} square={square} setSquare={setSquare} checkWinner={checkWinner} />
+          <h2 className='status'>{turn ? `${turn}'s ` : ''}{status}</h2>
+          <button className='play-button play-again d-none' onClick={() => startGame()}>
+            <img src={playIcon} alt="" />
+            Play Again
+          </button>
+        </div>
+        <History history={history} viewHistory={viewHistory} />
       </div>
-      <History history={history} viewHistory={viewHistory} />
-      <h2 className='status d-none'>{turn ? `${turn}'s ` : ''}{status}</h2>
-      <button className='play-button play-again d-none' onClick={() => startGame()}>
-        <img src={playIcon} alt="" />
-        Play Again
-      </button>
     </div>
   )
 }

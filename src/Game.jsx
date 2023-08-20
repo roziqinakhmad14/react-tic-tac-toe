@@ -5,7 +5,7 @@ function Square({value, onSquareClick}) {
 }
 
 Square.propTypes = {
-  value: PropTypes.number,
+  value: PropTypes.string,
   onSquareClick: PropTypes.func
 }
 
